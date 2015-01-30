@@ -1,0 +1,74 @@
+TABLES
+-------------------------
+
+DROP TABLE IF EXISTS user;
+CREATE TABLE user
+(
+	id integer primary key not null,
+	acronym varchar(20) unique not null,
+	email varchar(100) unique not null,
+	name varchar(80),
+	password varchar(255),
+	created datetime,
+	updated datetime,
+	deleted datetime,
+	active datetime,
+	votes VARCHAR(5000)
+);
+
+DROP TABLE IF EXISTS comments;
+CREATE TABLE comments
+(
+	id integer primary key not null ,
+	user varchar(20) not null,
+	name varchar(80) not null,
+	email varchar(100) not null,
+	title varchar(200),
+	text varchar(1000) not null,
+	texthtml varchar(2000) not null,
+	type varchar(8) not null,
+	replyto integer,
+	commenton integer,
+        accepted char(3),
+        score integer not null,
+        scoreusers varchar(5000),
+	timestamp datetime
+);
+
+DROP TABLE IF EXISTS tags;
+CREATE TABLE tags
+(
+    id integer primary key not null,
+    name CHAR(20) NOT NULL,
+   slug CHAR(20) NOT NULL
+);
+
+DROP TABLE IF EXISTS Ques2Tag;
+CREATE TABLE Ques2Tag
+(
+    idQues INT NOT NULL,
+    idTag INT NOT NULL,
+    
+    PRIMARY KEY (idQues, idTag),
+
+    FOREIGN KEY (idQues) REFERENCES comments (id) ON DELETE CASCADE,
+    FOREIGN KEY (idTag) REFERENCES tags (id) ON DELETE CASCADE
+    
+);
+
+VIEWS
+---------------------------------------
+
+DROP VIEW IF EXISTS VTags;
+CREATE VIEW VTags
+AS
+SELECT 
+    C.*,
+    GROUP_CONCAT(T.name) AS tags
+    FROM comments AS C
+    LEFT OUTER JOIN Ques2Tag AS Q2G
+        ON C.id = Q2G.idQues
+
+    LEFT OUTER JOIN tags AS T
+         ON Q2G.idTag = T.id
+GROUP BY C.id;
